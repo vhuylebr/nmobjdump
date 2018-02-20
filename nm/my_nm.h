@@ -33,6 +33,7 @@ typedef struct nm_s {
 	Elf64_Shdr *shd;
 	Elf64_Shdr sect_sym;
 	Elf64_Shdr *str_tab;
+        int nb_file;
 	int nb_func;
 	int shnum;
 	char *file_name;
@@ -40,6 +41,10 @@ typedef struct nm_s {
 
 void get_str_tab(void);
 Elf64_Shdr get_section(int macro);
+void fill_nmtab();
+void aff_nmtab();
+void sort_nmtab();
+char print_type(Elf64_Sym sym, Elf64_Shdr *shdr);
 
 nm_t nm;
 

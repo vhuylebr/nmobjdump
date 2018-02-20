@@ -10,12 +10,12 @@ NAMENM	=	my_nm
 NAMEOBJ	=	my_objdump
 
 SRCSNM	=	nm/nm_main.c \
-		nm/get.c
+		nm/get.c \
+		nm/nmtab.c
 
 SRCSOBJ	=	objdump/objdump_main.c
 
 CFLAGS	+=	-W -Wall -Wextra -Werror -I include
-#CFLAGS	+=	-I includes
 
 CC	=	gcc
 
