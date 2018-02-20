@@ -9,7 +9,8 @@
 NAMENM	=	my_nm
 NAMEOBJ	=	my_objdump
 
-SRCSNM	=	nm/nm_main.c
+SRCSNM	=	nm/nm_main.c \
+		nm/get.c
 
 SRCSOBJ	=	objdump/objdump_main.c
 

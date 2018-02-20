@@ -17,7 +17,7 @@ int verif_flag(Elf64_Ehdr *elf)
 
 }
 
-char            print_type(Elf64_Sym sym, Elf64_Shdr *shdr)
+char print_type(Elf64_Sym sym, Elf64_Shdr *shdr)
 {
 	char  c;
 
@@ -28,7 +28,8 @@ char            print_type(Elf64_Sym sym, Elf64_Shdr *shdr)
 		if (sym.st_shndx == SHN_UNDEF)
 			c = 'w';
 	}
-	else if (ELF64_ST_BIND(sym.st_info) == STB_WEAK && ELF64_ST_TYPE(sym.st_info) == STT_OBJECT) {
+	else if (ELF64_ST_BIND(sym.st_info) == STB_WEAK &&
+		ELF64_ST_TYPE(sym.st_info) == STT_OBJECT) {
 		c = 'V';
 		if (sym.st_shndx == SHN_UNDEF)
 			c = 'v';
@@ -45,13 +46,14 @@ char            print_type(Elf64_Sym sym, Elf64_Shdr *shdr)
 	else if (shdr[sym.st_shndx].sh_type == SHT_PROGBITS
 			&& shdr[sym.st_shndx].sh_flags == SHF_ALLOC)
 		c = 'R';
-	else if (shdr[sym.st_shndx].sh_type == SHT_PROGBITS
-			&& shdr[sym.st_shndx].sh_flags == (SHF_ALLOC | SHF_WRITE))
+	else if (shdr[sym.st_shndx].sh_type == SHT_PROGBITS &&
+		shdr[sym.st_shndx].sh_flags == (SHF_ALLOC | SHF_WRITE))
 		c = 'D';
-	else if (shdr[sym.st_shndx].sh_type == SHT_PROGBITS
-			&& shdr[sym.st_shndx].sh_flags == (SHF_ALLOC | SHF_EXECINSTR))
+	else if (shdr[sym.st_shndx].sh_type == SHT_PROGBITS &&
+		shdr[sym.st_shndx].sh_flags == (SHF_ALLOC | SHF_EXECINSTR))
 		c = 'T';
-	else if (shdr[sym.st_shndx].sh_type == SHT_INIT_ARRAY || shdr[sym.st_shndx].sh_type == SHT_FINI_ARRAY)
+	else if (shdr[sym.st_shndx].sh_type == SHT_INIT_ARRAY ||
+		shdr[sym.st_shndx].sh_type == SHT_FINI_ARRAY)
 		return 't';
 	else if (shdr[sym.st_shndx].sh_type == SHT_DYNAMIC)
 		c = 'D';
@@ -60,28 +62,6 @@ char            print_type(Elf64_Sym sym, Elf64_Shdr *shdr)
 	if (ELF64_ST_BIND(sym.st_info) == STB_LOCAL && c != '?')
 		c += 32;
 	return c;
-}
-
-void get_str_tab()
-{
-	int i;
-	
-	for (i = 0; i < nm.shnum; ++i) {
-		if (nm.shd[i].sh_type == SHT_STRTAB) {
-			nm.str_tab = &nm.shd[i];
-		}
-	}
-}
-
-Elf64_Shdr get_section(int macro)
-{
-	int i;
-	
-	for (i = 0; i < nm.shnum; ++i) {
-		if (nm.shd[i].sh_type == macro) {
-			return nm.shd[i];
-		}
-	}
 }
 
 int my_strcmp_nm(char *s, char *s2)
@@ -137,11 +117,28 @@ void aff_nmtab()
 	}
 }
 
+void fill_nmtab()
+{
+	int y = 0;
+	int i = 0;
+
+	for (y = 1; y < nm.nb_func; ++y) {
+		if (nm.symtab[y].st_info != STT_SECTION &&
+			nm.symtab[y].st_info != STT_FILE) {
+			nm.nmtab[i].name = (char *)(nm.buf +
+				nm.str_tab->sh_offset + nm.symtab[y].st_name);
+			nm.nmtab[i].type = print_type(nm.symtab[y], nm.shd);
+			if (nm.symtab[y].st_shndx == SHN_UNDEF)
+				nm.nmtab[i].value = -1;
+			else
+				nm.nmtab[i].value = nm.symtab[y].st_value;
+			++i;
+		}
+	}
+}
+
 void my_nm()
 {
-	int i = 0;
-	int y = 0;
-
 	nm.elf = nm.buf;
 	nm.shnum = nm.elf->e_shnum;
 	nm.shd = nm.buf + nm.elf->e_shoff;
@@ -151,22 +148,7 @@ void my_nm()
 	printf("\n%s:\n", nm.file_name);
 	nm.nb_func = nm.sect_sym.sh_size / nm.sect_sym.sh_entsize;
 	nm.nmtab = malloc(sizeof(nmtab_t) * nm.nb_func + 1);
-	for (y = 1; y < nm.nb_func; ++y) {
-		if (nm.symtab[y].st_info != STT_SECTION &&
-			nm.symtab[y].st_info != STT_FILE) {
-			nm.nmtab[i].name = (char *)(nm.buf + nm.str_tab->sh_offset + nm.symtab[y].st_name);
-			nm.nmtab[i].type = print_type(nm.symtab[y], nm.shd);
-			if (nm.symtab[y].st_shndx == SHN_UNDEF) {
-				nm.nmtab[i].value = -1;
-				//printf("%18c %s\n", print_type(nm.symtab[y], nm.shd), (char *)(nm.buf + nm.str_tab->sh_offset + nm.symtab[y].st_name));
-			}
-			else {
-				nm.nmtab[i].value = nm.symtab[y].st_value;
-				//printf("%016x %c %s\n", (unsigned int)nm.symtab[y].st_value,  print_type(nm.symtab[y], nm.shd), (char *)(nm.buf + nm.str_tab->sh_offset + nm.symtab[y].st_name));
-			}
-			++i;
-		}
-	}
+	fill_nmtab();
 	sort_nmtab();
 	aff_nmtab();
 	free(nm.nmtab);
