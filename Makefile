@@ -13,8 +13,8 @@ SRCSNM	=	nm/nm_main.c
 
 SRCSOBJ	=	objdump/objdump_main.c
 
-#CFLAGS	+=	-W -Wall -Wextra -Werror
-CFLAGS	+=	-I includes
+CFLAGS	+=	-W -Wall -Wextra -Werror -I include
+#CFLAGS	+=	-I includes
 
 CC	=	gcc
 

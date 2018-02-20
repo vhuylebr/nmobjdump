@@ -5,24 +5,7 @@
 ** nm
 */
 
-# define ELF_RELOC_ERR -1
-# define DO_386_64(S, A)	((S) + (A))
-# define DO_386_PC64(S, A, P)	((S) + (A) - (P))
-
-# include <fcntl.h>
-# include <stdio.h>
-# include <elf.h>
-# include <sys/mman.h>
-# include <sys/stat.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-
-static int elf_do_reloc(Elf64_Ehdr *hdr, Elf64_Rel *rel, Elf64_Shdr *reltab);
-static int elf_load_stage1(Elf64_Ehdr *hdr);
-static int elf_load_stage2(Elf64_Ehdr *hdr);
-static inline Elf64_Shdr *elf_sheader(Elf64_Ehdr *hdr);
-static inline Elf64_Shdr *elf_section(Elf64_Ehdr *hdr, int idx);
+#include "my_nm.h"
 
 int verif_flag(Elf64_Ehdr *elf)
 {
@@ -79,58 +62,151 @@ char            print_type(Elf64_Sym sym, Elf64_Shdr *shdr)
 	return c;
 }
 
-int main (int ac , char ** av )
+void get_str_tab()
 {
-	int fd;
-	void *buf;
-	struct stat s;
-	Elf64_Ehdr *elf;
-	Elf64_Shdr *shd;
+	int i;
+	
+	for (i = 0; i < nm.shnum; ++i) {
+		if (nm.shd[i].sh_type == SHT_STRTAB) {
+			nm.str_tab = &nm.shd[i];
+		}
+	}
+}
 
-	if (ac == 1)
-		return 84;
-	fd = open (av[1], O_RDONLY);
-	if ( fd != -1) {
-		fstat (fd, &s);
-		buf = mmap( NULL , s.st_size , PROT_READ , MAP_PRIVATE , fd , 0) ;
-		if (buf != NULL) {
-			elf = buf;
-			if (!verif_flag(elf))
-				return 84;
-			shd = buf + elf->e_shoff;
-			Elf64_Ehdr *ehdr = (Elf64_Ehdr*)buf;
-			Elf64_Shdr *shdr = (Elf64_Shdr *)(buf + elf->e_shoff);
-			Elf64_Shdr *sh_strtab = &shdr[ehdr->e_shstrndx];
-			const char *const sh_strtab_p = buf + sh_strtab->sh_offset;
-			int shnum = elf->e_shnum;
-			
-			Elf64_Sym *symtab;
-			int i;
-			int y;
-			Elf64_Shdr *str_tab;
-			for (i = 0; i < shnum; ++i) {
-				if (shd[i].sh_type == SHT_STRTAB) {
-					str_tab = &shd[i];
-				}
-			}
-			for (i = 0; i < shnum; ++i) {
-					//printf("%2d: %4d '%s'\n", i, shdr[i].sh_name, sh_strtab_p + shdr[i].sh_name);
-				if (shd[i].sh_type == SHT_SYMTAB) {
-					symtab = (Elf64_Sym *)(buf + shd[i].sh_offset);
-					for (y = 1; y < shd[i].sh_size / shd[i].sh_entsize; ++y) {
-						if (symtab[y].st_info != STT_SECTION && symtab[y].st_info != STT_FILE) {
-							if (symtab[y].st_shndx == SHN_UNDEF)
-								printf("%18c %s\n", print_type(symtab[y], shdr), (char *)(buf + str_tab->sh_offset + symtab[y].st_name));
-							else
-								printf("%016x %c %s\n", (unsigned int)symtab[y].st_value,  print_type(symtab[y], shdr), (char *)(buf + str_tab->sh_offset + symtab[y].st_name));
-						}
-					}
-				}
-			}
+Elf64_Shdr get_section(int macro)
+{
+	int i;
+	
+	for (i = 0; i < nm.shnum; ++i) {
+		if (nm.shd[i].sh_type == macro) {
+			return nm.shd[i];
+		}
+	}
+}
+
+int my_strcmp_nm(char *s, char *s2)
+{
+	int i = 0;
+	int y = 0;
+
+	if (!s || !s2)
+		return 0;
+	while (s[i] == '_')
+		++i;
+	while (s2[y] == '_')
+		y++;
+	while (tolower(s2[y]) == tolower(s[i]) && s2[y] && s[i]) {
+		++y;
+		++i;
+		while (s[i] == '_')
+			++i;
+		while (s2[y] == '_')
+			y++;
+	}
+	return (tolower(s[i]) - tolower(s2[y]));
+}
+
+void sort_nmtab()
+{
+	int i = 0;
+	nmtab_t tmp;
+
+	while (i < nm.nb_func) {
+		if (my_strcmp_nm(nm.nmtab[i].name, nm.nmtab[i + 1].name) > 0) {
+			tmp = nm.nmtab[i];
+			nm.nmtab[i] = nm.nmtab[i + 1];
+			nm.nmtab[i + 1] = tmp;
+			i = 0;
 		} else
-			perror (" mmap ");
-		close(fd);
-	} else
+			++i;
+	}
+}
+
+void aff_nmtab()
+{
+	int i = 0;
+
+	while (i < nm.nb_func && nm.nmtab[i].name) {
+		if (nm.nmtab[i].value != -1)
+			printf("%016x %c %s\n", nm.nmtab[i].value,
+				nm.nmtab[i].type, nm.nmtab[i].name);
+		else
+			printf("%18c %s\n", nm.nmtab[i].type,
+				nm.nmtab[i].name);
+		++i;
+	}
+}
+
+void my_nm()
+{
+	int i = 0;
+	int y = 0;
+
+	nm.elf = nm.buf;
+	nm.shnum = nm.elf->e_shnum;
+	nm.shd = nm.buf + nm.elf->e_shoff;
+	get_str_tab();
+	nm.sect_sym = get_section(SHT_SYMTAB);
+	nm.symtab = (Elf64_Sym *)(nm.buf + nm.sect_sym.sh_offset);
+	printf("\n%s:\n", nm.file_name);
+	nm.nb_func = nm.sect_sym.sh_size / nm.sect_sym.sh_entsize;
+	nm.nmtab = malloc(sizeof(nmtab_t) * nm.nb_func + 1);
+	for (y = 1; y < nm.nb_func; ++y) {
+		if (nm.symtab[y].st_info != STT_SECTION &&
+			nm.symtab[y].st_info != STT_FILE) {
+			nm.nmtab[i].name = (char *)(nm.buf + nm.str_tab->sh_offset + nm.symtab[y].st_name);
+			nm.nmtab[i].type = print_type(nm.symtab[y], nm.shd);
+			if (nm.symtab[y].st_shndx == SHN_UNDEF) {
+				nm.nmtab[i].value = -1;
+				//printf("%18c %s\n", print_type(nm.symtab[y], nm.shd), (char *)(nm.buf + nm.str_tab->sh_offset + nm.symtab[y].st_name));
+			}
+			else {
+				nm.nmtab[i].value = nm.symtab[y].st_value;
+				//printf("%016x %c %s\n", (unsigned int)nm.symtab[y].st_value,  print_type(nm.symtab[y], nm.shd), (char *)(nm.buf + nm.str_tab->sh_offset + nm.symtab[y].st_name));
+			}
+			++i;
+		}
+	}
+	sort_nmtab();
+	aff_nmtab();
+	free(nm.nmtab);
+}
+
+int start()
+{
+	if (nm.fd != -1) {
+		fstat(nm.fd, &nm.s);
+		nm.buf = mmap(NULL, nm.s.st_size, PROT_READ, MAP_PRIVATE, nm.fd,
+			0);
+		if (nm.buf != NULL && verif_flag((Elf64_Ehdr *)nm.buf)) {
+			my_nm();
+		} else {
+			dprintf(2, "my_nm: « %s »: not a valid file.\n",
+				nm.file_name);
+			return 84;
+		}
+		munmap(nm.buf, nm.s.st_size);
+		close(nm.fd);
+	} else {
+		dprintf(2, "my_nm: « %s »: file not found.\n", nm.file_name);
 		return 84;
-	return 0;
+	}
+}
+
+int main (int ac, char **av)
+{
+	int i = 1;
+
+	if (ac == 1) {
+		nm.fd = open("a.out", O_RDONLY);
+		start();
+	}
+	else {
+		while (i < ac) {
+			nm.file_name = av[i];
+			nm.fd = open(av[i], O_RDONLY);
+			start();
+			++i;
+		}
+	}
 }
