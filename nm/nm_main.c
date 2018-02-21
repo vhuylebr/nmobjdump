@@ -100,25 +100,29 @@ int start()
 		}
 		munmap(nm.buf, nm.s.st_size);
 		close(nm.fd);
-	} else {
-		dprintf(2, "my_nm: « %s »: file not found.\n", nm.file_name);
-		return 84;
-	}
+	} else
+		return (dprintf(2, "my_nm: « %s »: file not found.\n",
+                        nm.file_name) * 0 + 84);
+        return 0;
 }
 
 int main (int ac, char **av)
 {
 	int i = 1;
+        int ret = 0;
 
 	nm.nb_file = ac;
 	if (ac == 1) {
 		nm.fd = open("a.out", O_RDONLY);
-		start();
+                nm.file_name = "a.out";
+		return start();
 	} else {
 		while (i < ac) {
 			nm.file_name = av[i];
 			nm.fd = open(av[i], O_RDONLY);
-			start();
+			ret = start();
+                        if (ret == 84 && ac == 2)
+                                return 84;
 			++i;
 		}
 	}
