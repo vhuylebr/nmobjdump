@@ -11,7 +11,8 @@ NAMEOBJ	=	my_objdump
 
 SRCSNM	=	nm/nm_main.c \
 		nm/get.c \
-		nm/nmtab.c
+		nm/nmtab.c \
+		nm/print_type.c
 
 SRCSOBJ	=	objdump/objdump_main.c
 
