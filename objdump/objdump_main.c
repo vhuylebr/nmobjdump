@@ -20,11 +20,14 @@ int start()
 {
 	if (objdump.fd != -1) {
 		fstat(objdump.fd, &objdump.s);
+		if(S_ISDIR(objdump.s.st_mode))
+			return (dprintf(2, "my_objdump: « %s »: is a folder.\n",
+				objdump.file_name) * 0 + 84);
 		objdump.buf = mmap(NULL, objdump.s.st_size, PROT_READ, MAP_PRIVATE, objdump.fd,
 			0);
 		if (objdump.buf != NULL && verif_flag((Elf64_Ehdr *)objdump.buf)) {
 			//my_objdump();
-                        printf("obj\n");
+			printf("obj\n");
 		} else {
 			dprintf(2, "my_objdump: « %s »: not a valid file.\n",
 				objdump.file_name);
