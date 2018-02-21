@@ -85,6 +85,10 @@ int start()
 {
 	if (nm.fd != -1) {
 		fstat(nm.fd, &nm.s);
+
+                if(S_ISDIR(nm.s.st_mode))
+                        return (dprintf(2, "my_nm: « %s »: is a folder.\n",
+                                nm.file_name) * 0 + 84);
 		nm.buf = mmap(NULL, nm.s.st_size, PROT_READ, MAP_PRIVATE, nm.fd,
 			0);
 		if (nm.buf != NULL && verif_flag((Elf64_Ehdr *)nm.buf)) {
