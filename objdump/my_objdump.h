@@ -20,13 +20,14 @@
 typedef struct objdump_s {
 	int fd;
 	void *buf;
+	char *machine_name;
 	struct stat s;
 	Elf64_Ehdr *elf;
 	Elf64_Sym *symtab;
 	Elf64_Shdr *shd;
 	Elf64_Shdr sect_sym;
 	Elf64_Shdr *str_tab;
-        int nb_file;
+	int nb_file;
 	int nb_func;
 	int shnum;
 	char *file_name;

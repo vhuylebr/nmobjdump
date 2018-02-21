@@ -8,6 +8,7 @@
 #ifndef MY_NM_H_
 # define MY_NM_H_
 
+# include <ctype.h>
 # include <fcntl.h>
 # include <stdio.h>
 # include <elf.h>
@@ -33,9 +34,10 @@ typedef struct nm_s {
 	Elf64_Shdr *shd;
 	Elf64_Shdr sect_sym;
 	Elf64_Shdr *str_tab;
-        int nb_file;
+	int nb_file;
 	int nb_func;
 	int shnum;
+	int osn;
 	char *file_name;
 }	nm_t;
 
