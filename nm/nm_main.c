@@ -86,9 +86,9 @@ int start()
 	if (nm.fd != -1) {
 		fstat(nm.fd, &nm.s);
 
-                if(S_ISDIR(nm.s.st_mode))
-                        return (dprintf(2, "my_nm: « %s »: is a folder.\n",
-                                nm.file_name) * 0 + 84);
+		if(S_ISDIR(nm.s.st_mode))
+			return (dprintf(2, "my_nm: « %s »: is a folder.\n",
+				nm.file_name) * 0 + 84);
 		nm.buf = mmap(NULL, nm.s.st_size, PROT_READ, MAP_PRIVATE, nm.fd,
 			0);
 		if (nm.buf != NULL && verif_flag((Elf64_Ehdr *)nm.buf)) {
@@ -102,27 +102,27 @@ int start()
 		close(nm.fd);
 	} else
 		return (dprintf(2, "my_nm: « %s »: file not found.\n",
-                        nm.file_name) * 0 + 84);
-        return 0;
+			nm.file_name) * 0 + 84);
+	return 0;
 }
 
 int main (int ac, char **av)
 {
 	int i = 1;
-        int ret = 0;
+	int ret = 0;
 
 	nm.nb_file = ac;
 	if (ac == 1) {
 		nm.fd = open("a.out", O_RDONLY);
-                nm.file_name = "a.out";
+		nm.file_name = "a.out";
 		return start();
 	} else {
 		while (i < ac) {
 			nm.file_name = av[i];
 			nm.fd = open(av[i], O_RDONLY);
 			ret = start();
-                        if (ret == 84 && ac == 2)
-                                return 84;
+			if (ret == 84 && ac == 2)
+				return 84;
 			++i;
 		}
 	}
