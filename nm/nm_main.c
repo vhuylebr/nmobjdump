@@ -57,6 +57,8 @@ char print_type(Elf64_Sym sym, Elf64_Shdr *shdr)
 		return 't';
 	else if (shdr[sym.st_shndx].sh_type == SHT_DYNAMIC)
 		c = 'D';
+	else if (shdr[sym.st_shndx].sh_type == SHT_GROUP)
+		c = 'N';
 	else
 		c = '?';
 	if (ELF64_ST_BIND(sym.st_info) == STB_LOCAL && c != '?')
