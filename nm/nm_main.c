@@ -79,7 +79,7 @@ void my_nm()
 	fill_nmtab();
 	sort_nmtab();
 	aff_nmtab();
-	free(nm.nmtab);
+	//free(nm.nmtab);
 }
 
 int start()
