@@ -7,9 +7,9 @@
 
 #include "my_objdump.h"
 
-void print_dec(int y, char *str, int max)
+void print_dec(unsigned int y, char *str, unsigned int max)
 {
-	int tmp = y;
+	unsigned int tmp = y;
 
 	if (y < max)
 		y = y - 16;
@@ -29,7 +29,7 @@ void print_dec(int y, char *str, int max)
 	}
 }
 
-void print_end(int y, int i, char *str)
+void print_end(unsigned int y, int i, char *str)
 {
 	int padding = 0;
 
@@ -46,7 +46,7 @@ void print_end(int y, int i, char *str)
 void print_hex(int i)
 {
 	char *str = (char*)(objdump.buf + objdump.shd[i].sh_offset);
-	int y = 1;
+	unsigned int y = 1;
 
 	while (y <= objdump.shd[i].sh_size) {
 		if (y - 1 == 0)
@@ -66,7 +66,7 @@ void print_hex(int i)
 	print_end(y, i, str);
 }
 
-int print_data(char *sh_strtab_p)
+void print_data(char *sh_strtab_p)
 {
 	int i = 0;
 
