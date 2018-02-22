@@ -107,13 +107,14 @@ int main(int ac, char **av)
 
 	objdump.nb_file = ac;
 	if (ac == 1) {
+                objdump.file_name = "a.out";
 		objdump.fd = open("a.out", O_RDONLY);
 		start();
 	} else {
 		while (i < ac) {
 			objdump.file_name = av[i];
 			objdump.fd = open(av[i], O_RDONLY);
-                        ret = start();
+			ret = start();
 			if (ac == 2 && ret == 84)
 				return 84;
 			++i;
