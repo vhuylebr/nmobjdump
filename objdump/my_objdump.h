@@ -43,6 +43,10 @@ typedef struct pc_s {
 void get_machine_name(void);
 void get_str_tab(void);
 char *getflag(void);
+void print_dec(int y, char *str, int max);
+void print_end(int y, int i, char *str);
+void print_hex(int i);
+int print_data(char *sh_strtab_p);
 
 objdump_t objdump;
 
