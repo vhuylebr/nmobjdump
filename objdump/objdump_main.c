@@ -20,24 +20,6 @@ static void get_machine_name(void)
 {
   	int i = 0;
 
-	pc_t pc[20] = {{EM_NONE, "None"},
-		{EM_M32, "WE32100"},
-		{EM_SPARC, "Sparc"},
-		{EM_386, "Intel 80386"},
-		{EM_68K, "MC68000"},
-		{EM_PPC64, "PowerPC64"},
-		{EM_88K, "MC88000"},
-		{EM_PARISC, "HPPA"},
-		{EM_SPARC32PLUS, "Sparc v8+"},
-		{EM_PPC, "PowerPC"},
-		{EM_S390, "IBM S/390"},
-		{EM_MIPS, "MIPS R3000"},
-		{EM_ARM, "ARM"},
-		{EM_860, "Intel 80860"},
-		{EM_SH, "Renesas / SuperH SH"},
-		{EM_SPARCV9, "Sparc v9"},
-		{EM_IA_64, "Intel IA-64"},
-		{EM_X86_64, "i386:x86-64"}};
 	while (i < 18) {
 		if (pc[i].macro == objdump.elf->e_machine) {
 			objdump.machine_name = pc[i].str;
@@ -51,11 +33,18 @@ static void get_machine_name(void)
 void get_str_tab(void)
 {
 	int i;
-	
+	char *name_s;
+
 	for (i = 0; i < objdump.shnum; ++i) {
 		if (objdump.shd[i].sh_type == SHT_STRTAB) {
 			objdump.str_tab = &objdump.shd[i];
-			return;
+			name_s = (char*)objdump.buf + objdump.str_tab->sh_offset
+				+ objdump.shd[i].sh_name;
+			if (!strcmp(name_s, ".shstrtab") && objdump.osn == 0) {
+				objdump.osn = objdump.str_tab->sh_offset;
+                                objdump.str_tab = &objdump.shd[i];
+				break;
+			}
 		}
 	}
 }
@@ -70,28 +59,42 @@ char *getflag(void)
                 case ET_DYN:
                         return ("00000150:\nHAS_SYMS, DYNAMIC, D_PAGED");
                 case ET_CORE:
-                        printf("Core");
-                        break;
+                        return ("Core\n");
         }
 }
 
 void my_objdump(void)
 {
 	int i;
+        char *sh_strtab_p = NULL;
 
 	objdump.elf = objdump.buf;
 	objdump.shnum = objdump.elf->e_shnum;
 	objdump.shd = objdump.buf + objdump.elf->e_shoff;
 	get_machine_name();
 	get_str_tab();
-	//objdump.str_tab = &objdump.shdr[objdump.elf->e_shstrndx];
 	printf("\n%s:     file format %s\n", objdump.file_name, "elf64-x86-64");
 	printf("architecture: %s, flags %s\n", objdump.machine_name,
 		getflag());
 	printf("start address 0x%016lx\n\n", objdump.elf->e_entry);
-	const char *const sh_strtab_p = objdump.buf + objdump.str_tab->sh_offset;
+	sh_strtab_p = objdump.buf + objdump.str_tab->sh_offset;
 	for (i = 0; i < objdump.shnum; ++i) {
-	//	printf("%s\n", (char*)(sh_strtab_p + objdump.shd[i].sh_name));
+                if (!strcmp((char*)(sh_strtab_p + objdump.shd[i].sh_name), ".text")) {
+		        printf("Contents of section %s\n", (char*)(sh_strtab_p + objdump.shd[i].sh_name));
+                        char *str = (char*)(objdump.buf + objdump.shd[i].sh_offset);
+                        int y = 1;
+                        while (y < objdump.shd[i].sh_size) {
+                                if (y - 1 == 0)
+                                        printf("0000 ");
+                                printf("%02x", (unsigned char)str[y - 1]);
+                                if (!(y % 4) && y > 0 && (y % 16))
+                                        printf(" ");
+                                else if (!(y % 16) && y > 0)
+                                        printf("\n%04x ", y);
+                                ++y;
+                        }
+                        printf("\n");
+                }
 	}
 }
 
@@ -102,9 +105,10 @@ int start(void)
 		if(S_ISDIR(objdump.s.st_mode))
 			return (dprintf(2, "my_objdump: « %s »: is a folder.\n",
 				objdump.file_name) * 0 + 84);
-		objdump.buf = mmap(NULL, objdump.s.st_size, PROT_READ, MAP_PRIVATE, objdump.fd,
-			0);
-		if (objdump.buf != NULL && verif_flag((Elf64_Ehdr *)objdump.buf)) {
+		objdump.buf = mmap(NULL, objdump.s.st_size, PROT_READ,
+			MAP_PRIVATE, objdump.fd, 0);
+		if (objdump.buf != NULL &&
+			verif_flag((Elf64_Ehdr *)objdump.buf)) {
 			my_objdump();
 		} else {
 			dprintf(2, "my_objdump: « %s »: not a valid file.\n",
@@ -112,10 +116,9 @@ int start(void)
 			return 84;
 		}
 		close(objdump.fd);
-	} else {
-		dprintf(2, "my_objdump: « %s »: file not found.\n", objdump.file_name);
-		return 84;
-	}
+	} else
+		return (dprintf(2, "my_objdump: « %s »: file not found.\n",
+			objdump.file_name) * 0 + 84);
 }
 
 int main(int ac, char **av)

@@ -31,6 +31,7 @@ typedef struct objdump_s {
 	int nb_func;
 	int shnum;
 	char *file_name;
+        int osn;
 } objdump_t;
 
 
@@ -39,6 +40,26 @@ typedef struct pc_s {
 	char *str;
 } pc_t;
 
+pc_t pc[20] = {
+        {EM_NONE, "None"},
+	{EM_M32, "WE32100"},
+	{EM_SPARC, "Sparc"},
+	{EM_386, "Intel 80386"},
+	{EM_68K, "MC68000"},
+	{EM_PPC64, "PowerPC64"},
+	{EM_88K, "MC88000"},
+	{EM_PARISC, "HPPA"},
+	{EM_SPARC32PLUS, "Sparc v8+"},
+	{EM_PPC, "PowerPC"},
+	{EM_S390, "IBM S/390"},
+	{EM_MIPS, "MIPS R3000"},
+	{EM_ARM, "ARM"},
+	{EM_860, "Intel 80860"},
+	{EM_SH, "Renesas / SuperH SH"},
+	{EM_SPARCV9, "Sparc v9"},
+	{EM_IA_64, "Intel IA-64"},
+	{EM_X86_64, "i386:x86-64"}
+};
 objdump_t objdump;
 
 #endif /* !MY_OBJDUP_H_ */
