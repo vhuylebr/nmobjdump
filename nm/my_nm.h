@@ -43,9 +43,9 @@ typedef struct nm_s {
 
 void get_str_tab(void);
 Elf64_Shdr get_section(int macro);
-void fill_nmtab();
-void aff_nmtab();
-void sort_nmtab();
+void fill_nmtab(void);
+void aff_nmtab(void);
+void sort_nmtab(void);
 char print_type(Elf64_Sym sym, Elf64_Shdr *shdr);
 
 nm_t nm;

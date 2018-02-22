@@ -16,12 +16,7 @@ int verif_flag(Elf64_Ehdr *elf)
 
 }
 
-typedef struct pc_s {
-	int macro;
-	char *str;
-} pc_t;
-
-static void get_machine_name()
+static void get_machine_name(void)
 {
   	int i = 0;
 
@@ -65,24 +60,20 @@ void get_str_tab(void)
 	}
 }
 
-int print_shdr(const char *const fname, size_t size) {
-  int fd = open(fname, O_RDONLY);
-  //char *p = mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
-	void *p = mmap(NULL, objdump.s.st_size, PROT_READ, MAP_PRIVATE, objdump.fd,
-			0);
-  Elf32_Ehdr *ehdr = (Elf32_Ehdr*)p;
-  Elf32_Shdr *shdr = (Elf32_Shdr *)(p + ehdr->e_shoff);
-  int shnum = objdump.elf->e_shnum;
-
-  Elf32_Shdr *sh_strtab = &shdr[ehdr->e_shstrndx];
-  const char *const sh_strtab_p = p + sh_strtab->sh_offset;
-int i;
-  for (i = 0; i < shnum; ++i) {
-    printf("%2d: %4d '%s'\n", i, shdr[i].sh_name,
-	   sh_strtab_p + shdr[i].sh_name);
-  }
-  return 0;
-}	
+char *getflag(void)
+{
+        switch (objdump.elf->e_type) {
+                case ET_REL:
+                        return ("00000011:\nHAS_RELOC, HAS_SYMS");
+                case ET_EXEC:
+                        return ("00000112:\nEXEC_P, HAS_SYMS, D_PAGED");
+                case ET_DYN:
+                        return ("00000150:\nHAS_SYMS, DYNAMIC, D_PAGED");
+                case ET_CORE:
+                        printf("Core");
+                        break;
+        }
+}
 
 void my_objdump(void)
 {
@@ -95,17 +86,16 @@ void my_objdump(void)
 	get_str_tab();
 	//objdump.str_tab = &objdump.shdr[objdump.elf->e_shstrndx];
 	printf("\n%s:     file format %s\n", objdump.file_name, "elf64-x86-64");
-	printf("architecture: %s, flags 0x%08x:\n", objdump.machine_name,
-		objdump.elf->e_flags);
+	printf("architecture: %s, flags %s\n", objdump.machine_name,
+		getflag());
 	printf("start address 0x%016lx\n\n", objdump.elf->e_entry);
 	const char *const sh_strtab_p = objdump.buf + objdump.str_tab->sh_offset;
 	for (i = 0; i < objdump.shnum; ++i) {
-		printf("%i\n", (int)objdump.shd[i].sh_name);
-		printf("%s\n", (char*)(sh_strtab_p + objdump.shd[i].sh_name));
+	//	printf("%s\n", (char*)(sh_strtab_p + objdump.shd[i].sh_name));
 	}
 }
 
-int start()
+int start(void)
 {
 	if (objdump.fd != -1) {
 		fstat(objdump.fd, &objdump.s);
@@ -121,7 +111,6 @@ int start()
 				objdump.file_name);
 			return 84;
 		}
-		//muobjdumpap(objdump.buf, objdump.s.st_size);
 		close(objdump.fd);
 	} else {
 		dprintf(2, "my_objdump: « %s »: file not found.\n", objdump.file_name);
@@ -129,7 +118,7 @@ int start()
 	}
 }
 
-int main (int ac, char **av)
+int main(int ac, char **av)
 {
 	int i = 1;
 

@@ -6,7 +6,7 @@
 */
 
 #ifndef MY_OBJDUP_H_
-	#define MY_OBJDUP_H_
+# define MY_OBJDUP_H_
 
 # include <fcntl.h>
 # include <stdio.h>
@@ -31,7 +31,13 @@ typedef struct objdump_s {
 	int nb_func;
 	int shnum;
 	char *file_name;
-}	objdump_t;
+} objdump_t;
+
+
+typedef struct pc_s {
+	int macro;
+	char *str;
+} pc_t;
 
 objdump_t objdump;
 
