@@ -7,6 +7,38 @@
 
 #include "my_objdump.h"
 
+static char const *bad_section_o[] = {
+	".rela.eh_frame",
+	".strtab",
+	".shstrtab",
+	".note.GNU-stack",
+	".symtab",
+	".data",
+	".rela.text",
+	".bss",
+        ".rela.rodata"
+};
+
+static char const *bad_section_exec[] = {
+	".rela.eh_frame",
+	".strtab",
+	".shstrtab",
+	".note.GNU-stack",
+	".symtab",
+	".rela.text",
+	".bss"
+};
+
+static char const *bad_section_so[] = {
+	".rela.eh_frame",
+	".strtab",
+	".shstrtab",
+	".note.GNU-stack",
+	".symtab",
+	".rela.text",
+	".bss"
+};
+
 int verif_flag(Elf64_Ehdr *elf)
 {
 	if (elf->e_ident[1] == 'E' && elf->e_ident[2] == 'L'
@@ -16,138 +48,105 @@ int verif_flag(Elf64_Ehdr *elf)
 
 }
 
-static void get_machine_name(void)
-{
-  	int i = 0;
-
-	while (i < 18) {
-		if (pc[i].macro == objdump.elf->e_machine) {
-			objdump.machine_name = pc[i].str;
-			return ;
-		}
-		++i;
-	}
-	objdump.machine_name = "i386:x86-64";
-}
-
-void get_str_tab(void)
-{
-	int i;
-	char *name_s;
-
-	for (i = 0; i < objdump.shnum; ++i) {
-		if (objdump.shd[i].sh_type == SHT_STRTAB) {
-			objdump.str_tab = &objdump.shd[i];
-			name_s = (char*)objdump.buf + objdump.str_tab->sh_offset
-				+ objdump.shd[i].sh_name;
-			if (!strcmp(name_s, ".shstrtab") && objdump.osn == 0) {
-				objdump.osn = objdump.str_tab->sh_offset;
-                                objdump.str_tab = &objdump.shd[i];
-				break;
-			}
-		}
-	}
-}
-
-char *getflag(void)
-{
-        switch (objdump.elf->e_type) {
-                case ET_REL:
-                        return ("00000011:\nHAS_RELOC, HAS_SYMS");
-                case ET_EXEC:
-                        return ("00000112:\nEXEC_P, HAS_SYMS, D_PAGED");
-                case ET_DYN:
-                        return ("00000150:\nHAS_SYMS, DYNAMIC, D_PAGED");
-                case ET_CORE:
-                        return ("Core\n");
-        }
-}
-
 void print_dec(int y, char *str, int max)
 {
-        int tmp = y;
+	int tmp = y;
 
-        if (y < max)
-                y = y - 16;
-        else if (!(y % 16) && y == max) {
-                y = y - 16;
-        } else {
-                y = y - max % 16 - 1;
-                --tmp;
-        }
-        printf("  ");
-        while (y < tmp) {
-                if (isprint(str[y]))
-                        printf("%c", str[y]);
-                else
-                        printf(".");
-                ++y;
-        }
+	if (y < max)
+		y = y - 16;
+	else if (!(y % 16) && y == max) {
+		y = y - 16;
+	} else {
+		y = y - max % 16 - 1;
+		--tmp;
+	}
+	printf("  ");
+	while (y < tmp) {
+		if (isprint(str[y]))
+			printf("%c", str[y]);
+		else
+			printf(".");
+		++y;
+	}
 }
 
-char *bad_section_o[] = {
-        ".rela.eh_frame",
-        ".strtab",
-        ".shstrtab",
-        ".note.GNU-stack",
-        ".symtab",
-        ".data",
-        ".rela.text",
-        ".bss"
-};
+int is_ok(char *str, int i)
+{
+	if (objdump.elf->e_type == ET_REL) {
+		while (i < 9) {
+			if (!strcmp(str, bad_section_o[i]))
+				return (0);
+			++i;
+		}
+	} else if (objdump.elf->e_type == ET_EXEC) {
+		while (i < 7) {
+			if (!strcmp(str, bad_section_exec[i]))
+				return (0);
+			++i;
+		}
+	} else {
+		while (i < 7) {
+			if (!strcmp(str, bad_section_exec[i]))
+				return (0);
+			++i;
+		}
+	}
+	return (1);
+}
 
-char *bad_section_exec[] = {
-        ".rela.eh_frame",
-        ".strtab",
-        ".shstrtab",
-        ".note.GNU-stack",
-        ".symtab",
-        ".rela.text",
-        ".bss"
-};
+void print_end(int y, int i, char *str)
+{
+	int padding = 0;
 
-char *bad_section_so[] = {
-        ".rela.eh_frame",
-        ".strtab",
-        ".shstrtab",
-        ".note.GNU-stack",
-        ".symtab",
-        ".rela.text",
-        ".bss"
-};
+        if (!(y % 16) && y == objdump.shd[i].sh_size) {
+		padding = 0;
+	} else {
+		padding = (16 - (int)objdump.shd[i].sh_size % 16) * 2;
+		printf("%*s", padding + padding / 9, " ");
+	}
+	print_dec(y, str, objdump.shd[i].sh_size);
+	printf("\n");
+}
 
-int is_ok(char *str)
+void print_hex(int i)
+{
+	char *str = (char*)(objdump.buf + objdump.shd[i].sh_offset);
+	int y = 1;
+
+	while (y <= objdump.shd[i].sh_size) {
+		if (y - 1 == 0)
+			printf(" %04x ", (unsigned int)objdump.shd[i].sh_addr);
+		printf("%02x", (unsigned char)str[y - 1]);
+		if (!(y % 16) && y == objdump.shd[i].sh_size)
+			break;
+		if (!(y % 4) && y > 0 && (y % 16))
+			printf(" ");
+		else if (!(y % 16) && y > 0) {
+			print_dec(y, str, objdump.shd[i].sh_size);
+			printf("\n %04x ",
+                                (unsigned int)objdump.shd[i].sh_addr + y);
+		}
+		++y;
+	}
+        print_end(y, i, str);
+}
+
+int print_data(char *sh_strtab_p)
 {
         int i = 0;
 
-        if (objdump.elf->e_type == ET_REL) {
-                while (i < 8) {
-                        if (!strcmp(str, bad_section_o[i]))
-                                return (0);
-                        ++i;
-                }
-                return (1);
-        } else if (objdump.elf->e_type == ET_EXEC) {
-                while (i < 7) {
-                        if (!strcmp(str, bad_section_exec[i]))
-                                return (0);
-                        ++i;
-                }
-        } else {
-                while (i < 7) {
-                        if (!strcmp(str, bad_section_exec[i]))
-                                return (0);
-                        ++i;
-                }
-        }
+        for (i = 1; i < objdump.shnum; ++i) {
+		if (is_ok((char*)(sh_strtab_p + objdump.shd[i].sh_name), 0)) {
+                	printf("Contents of section %s:\n",
+                                (char*)(sh_strtab_p + objdump.shd[i].sh_name));
+                        print_hex(i);
+		}
+	}
 }
+
 
 void my_objdump(void)
 {
-	int i;
-        char *sh_strtab_p = NULL;
-        int padding;
-
 	objdump.elf = objdump.buf;
 	objdump.shnum = objdump.elf->e_shnum;
 	objdump.shd = objdump.buf + objdump.elf->e_shoff;
@@ -157,36 +156,7 @@ void my_objdump(void)
 	printf("architecture: %s, flags %s\n", objdump.machine_name,
 		getflag());
 	printf("start address 0x%016lx\n\n", objdump.elf->e_entry);
-	sh_strtab_p = objdump.buf + objdump.str_tab->sh_offset;
-	for (i = 1; i < objdump.shnum; ++i) {
-                if (is_ok((char*)(sh_strtab_p + objdump.shd[i].sh_name))) {
-		        printf("Contents of section %s:\n", (char*)(sh_strtab_p + objdump.shd[i].sh_name));
-                        char *str = (char*)(objdump.buf + objdump.shd[i].sh_offset);
-                        int y = 1;
-                        while (y <= objdump.shd[i].sh_size) {
-                                if (y - 1 == 0)
-                                        printf(" %04x ", (unsigned int)objdump.shd[i].sh_addr);
-                                printf("%02x", (unsigned char)str[y - 1]);
-                                if (!(y % 16) && y == objdump.shd[i].sh_size)
-                                        break;
-                                if (!(y % 4) && y > 0 && (y % 16))
-                                        printf(" ");
-                                else if (!(y % 16) && y > 0) {
-                                        print_dec(y, str, objdump.shd[i].sh_size);
-                                        printf("\n %04x ", (unsigned int)objdump.shd[i].sh_addr + y);
-                                }
-                                ++y;
-                        }
-                        if (!(y % 16) && y == objdump.shd[i].sh_size) {
-                                padding = 0;
-                        } else {
-                                padding = (16 - (int)objdump.shd[i].sh_size % 16) * 2;
-                                printf("%*s", padding + padding / 9, " ");
-                        }
-                        print_dec(y, str, objdump.shd[i].sh_size);
-                        printf("\n");
-                }
-	}
+        print_data(objdump.buf + objdump.str_tab->sh_offset);
 }
 
 int start(void)
