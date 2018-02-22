@@ -8,6 +8,7 @@
 #ifndef MY_OBJDUP_H_
 # define MY_OBJDUP_H_
 
+# include <ctype.h>
 # include <fcntl.h>
 # include <stdio.h>
 # include <elf.h>
@@ -43,10 +44,11 @@ typedef struct pc_s {
 void get_machine_name(void);
 void get_str_tab(void);
 char *getflag(void);
-void print_dec(int y, char *str, int max);
-void print_end(int y, int i, char *str);
+void print_dec(unsigned int y, char *str, unsigned int max);
+void print_end(unsigned int y, int i, char *str);
 void print_hex(int i);
-int print_data(char *sh_strtab_p);
+void print_data(char *sh_strtab_p);
+int is_ok(char *str, int i);
 
 objdump_t objdump;
 

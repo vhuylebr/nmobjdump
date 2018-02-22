@@ -73,4 +73,5 @@ char *getflag(void)
 		case ET_CORE:
 			return ("Core\n");
 	}
+        return "(null)";
 }

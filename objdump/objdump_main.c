@@ -29,16 +29,6 @@ static char const *bad_section_exec[] = {
 	".bss"
 };
 
-static char const *bad_section_so[] = {
-	".rela.eh_frame",
-	".strtab",
-	".shstrtab",
-	".note.GNU-stack",
-	".symtab",
-	".rela.text",
-	".bss"
-};
-
 int verif_flag(Elf64_Ehdr *elf)
 {
 	if (elf->e_ident[1] == 'E' && elf->e_ident[2] == 'L'
@@ -107,11 +97,13 @@ int start(void)
 	} else
 		return (dprintf(2, "my_objdump: « %s »: file not found.\n",
 			objdump.file_name) * 0 + 84);
+	return 0;
 }
 
 int main(int ac, char **av)
 {
 	int i = 1;
+	int ret = 0;
 
 	objdump.nb_file = ac;
 	if (ac == 1) {
@@ -121,7 +113,8 @@ int main(int ac, char **av)
 		while (i < ac) {
 			objdump.file_name = av[i];
 			objdump.fd = open(av[i], O_RDONLY);
-			if (ac == 2 && start() == 84)
+                        ret = start();
+			if (ac == 2 && ret == 84)
 				return 84;
 			++i;
 		}
