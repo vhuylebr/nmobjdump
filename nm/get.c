@@ -41,5 +41,5 @@ Elf64_Shdr get_section(int macro)
 			return nm.shd[i];
 		}
 	}
-        return nm.shd[i];
+	return nm.shd[i];
 }

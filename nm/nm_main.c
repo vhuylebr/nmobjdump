@@ -9,7 +9,6 @@
 
 int verif_flag(Elf64_Ehdr *elf)
 {
-	//printf ("E=%c L=%c F=%c\n", elf->e_ident[1], elf->e_ident[2], elf->e_ident[3]);
 	if (elf->e_ident[1] == 'E' && elf->e_ident[2] == 'L'
 		  && elf->e_ident[3] == 'F')
 		return 1;

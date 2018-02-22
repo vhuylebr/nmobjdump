@@ -29,7 +29,7 @@ static int my_strcmp_nm(char *s, char *s2)
 	return (tolower(s[i]) - tolower(s2[y]));
 }
 
-void sort_nmtab()
+void sort_nmtab(void)
 {
 	int i = 0;
 	nmtab_t tmp;
@@ -45,7 +45,7 @@ void sort_nmtab()
 	}
 }
 
-void aff_nmtab()
+void aff_nmtab(void)
 {
 	int i = 0;
 
@@ -60,7 +60,7 @@ void aff_nmtab()
 	}
 }
 
-void fill_nmtab()
+void fill_nmtab(void)
 {
 	int y = 0;
 	int i = 0;
