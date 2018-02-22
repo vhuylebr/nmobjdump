@@ -15,7 +15,8 @@ SRCSNM	=	nm/nm_main.c \
 		nm/print_type.c
 
 SRCSOBJ	=	objdump/objdump_main.c \
-		objdump/get.c
+		objdump/get.c \
+		objdump/print.c
 
 CFLAGS	+=	-W -Wall -Wextra -Werror -I include
 
