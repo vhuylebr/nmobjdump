@@ -35,7 +35,6 @@ typedef struct objdump_s {
 	int osn;
 } objdump_t;
 
-
 typedef struct pc_s {
 	int macro;
 	char *str;

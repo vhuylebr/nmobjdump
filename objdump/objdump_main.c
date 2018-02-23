@@ -33,8 +33,8 @@ int verif_flag(Elf64_Ehdr *elf)
 {
 	if (elf->e_ident[1] == 'E' && elf->e_ident[2] == 'L'
 		  && elf->e_ident[3] == 'F')
-		return 1;
-	return 0;
+		return (1);
+	return (0);
 
 }
 
@@ -80,7 +80,7 @@ int start(void)
 {
 	if (objdump.fd != -1) {
 		fstat(objdump.fd, &objdump.s);
-		if(S_ISDIR(objdump.s.st_mode))
+		if (S_ISDIR(objdump.s.st_mode))
 			return (dprintf(2, "my_objdump: « %s »: is a folder.\n",
 				objdump.file_name) * 0 + 84);
 		objdump.buf = mmap(NULL, objdump.s.st_size, PROT_READ,
@@ -91,13 +91,13 @@ int start(void)
 		} else {
 			dprintf(2, "my_objdump: « %s »: not a valid file.\n",
 				objdump.file_name);
-			return 84;
+			return (84);
 		}
 		close(objdump.fd);
 	} else
 		return (dprintf(2, "my_objdump: « %s »: file not found.\n",
 			objdump.file_name) * 0 + 84);
-	return 0;
+	return (0);
 }
 
 int main(int ac, char **av)
@@ -116,9 +116,9 @@ int main(int ac, char **av)
 			objdump.fd = open(av[i], O_RDONLY);
 			ret = start();
 			if (ac == 2 && ret == 84)
-				return 84;
+				return (84);
 			++i;
 		}
 	}
-	return 0;
+	return (0);
 }
