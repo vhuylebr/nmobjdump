@@ -38,8 +38,8 @@ Elf64_Shdr get_section(int macro)
 
 	for (i = 0; i < nm.shnum; ++i) {
 		if (nm.shd[i].sh_type == (unsigned int)macro) {
-			return nm.shd[i];
+			return (nm.shd[i]);
 		}
 	}
-	return nm.shd[i];
+	return (nm.shd[i]);
 }

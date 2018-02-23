@@ -11,12 +11,12 @@ int verif_flag(Elf64_Ehdr *elf)
 {
 	if (elf->e_ident[1] == 'E' && elf->e_ident[2] == 'L'
 		  && elf->e_ident[3] == 'F')
-		return 1;
-	return 0;
+		return (1);
+	return (0);
 
 }
 
-void my_nm()
+void my_nm(void)
 {
 	nm.elf = nm.buf;
 	nm.shnum = nm.elf->e_shnum;
@@ -33,12 +33,11 @@ void my_nm()
 	aff_nmtab();
 }
 
-int start()
+int start(void)
 {
 	if (nm.fd != -1) {
 		fstat(nm.fd, &nm.s);
-
-		if(S_ISDIR(nm.s.st_mode))
+		if (S_ISDIR(nm.s.st_mode))
 			return (dprintf(2, "my_nm: « %s »: is a folder.\n",
 				nm.file_name) * 0 + 84);
 		nm.buf = mmap(NULL, nm.s.st_size, PROT_READ, MAP_PRIVATE, nm.fd,
@@ -48,14 +47,14 @@ int start()
 		} else {
 			dprintf(2, "my_nm: « %s »: not a valid file.\n",
 				nm.file_name);
-			return 84;
+			return (84);
 		}
 		munmap(nm.buf, nm.s.st_size);
 		close(nm.fd);
 	} else
 		return (dprintf(2, "my_nm: « %s »: file not found.\n",
 			nm.file_name) * 0 + 84);
-	return 0;
+	return (0);
 }
 
 int main (int ac, char **av)
@@ -67,16 +66,16 @@ int main (int ac, char **av)
 	if (ac == 1) {
 		nm.fd = open("a.out", O_RDONLY);
 		nm.file_name = "a.out";
-		return start();
+		return (start());
 	} else {
 		while (i < ac) {
 			nm.file_name = av[i];
 			nm.fd = open(av[i], O_RDONLY);
 			ret = start();
 			if (ret == 84 && ac == 2)
-				return 84;
+				return (84);
 			++i;
 		}
 	}
-	return 0;
+	return (0);
 }

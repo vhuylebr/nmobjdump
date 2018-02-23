@@ -97,5 +97,5 @@ char print_type(Elf64_Sym sym, Elf64_Shdr *shdr)
 		c = '?';
 	else if (ELF64_ST_BIND(sym.st_info) == STB_LOCAL && c != 't')
 		c += 32;
-	return c;
+	return (c);
 }

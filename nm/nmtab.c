@@ -13,7 +13,7 @@ static int my_strcmp_nm(char *s, char *s2)
 	int y = 0;
 
 	if (!s || !s2)
-		return 0;
+		return (0);
 	while (s[i] == '_')
 		++i;
 	while (s2[y] == '_')
