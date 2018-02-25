@@ -38,26 +38,26 @@ int verif_flag(Elf64_Ehdr *elf)
 
 }
 
+int find(int size, char *str, const char **str2)
+{
+	int i = 0;
+
+	while (i < size) {
+		if (!strcmp(str, str2[i]))
+			return (0);
+		++i;
+	}
+	return (1);
+}
+
 int is_ok(char *str, int i)
 {
 	if (objdump.elf->e_type == ET_REL) {
-		while (i < 9) {
-			if (!strcmp(str, bad_section_o[i]))
-				return (0);
-			++i;
-		}
+		return (find(9, str, bad_section_o));
 	} else if (objdump.elf->e_type == ET_EXEC) {
-		while (i < 7) {
-			if (!strcmp(str, bad_section_exec[i]))
-				return (0);
-			++i;
-		}
+		return (find(7, str, bad_section_exec));
 	} else {
-		while (i < 7) {
-			if (!strcmp(str, bad_section_exec[i]))
-				return (0);
-			++i;
-		}
+		return (find(7, str, bad_section_exec));
 	}
 	return (1);
 }
@@ -100,6 +100,12 @@ int start(void)
 	return (0);
 }
 
+void error(ac, ret)
+{
+	if (ac == 2 && ret == 84)
+		exit(84);
+}
+
 int main(int ac, char **av)
 {
 	int i = 1;
@@ -107,7 +113,7 @@ int main(int ac, char **av)
 
 	objdump.nb_file = ac;
 	if (ac == 1) {
-                objdump.file_name = "a.out";
+		objdump.file_name = "a.out";
 		objdump.fd = open("a.out", O_RDONLY);
 		start();
 	} else {
@@ -115,8 +121,7 @@ int main(int ac, char **av)
 			objdump.file_name = av[i];
 			objdump.fd = open(av[i], O_RDONLY);
 			ret = start();
-			if (ac == 2 && ret == 84)
-				return (84);
+			error(ac, ret);
 			++i;
 		}
 	}

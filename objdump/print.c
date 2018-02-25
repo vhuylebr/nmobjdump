@@ -54,6 +54,7 @@ void print_hex(int i)
 		printf("%02x", (unsigned char)str[y - 1]);
 		if (!(y % 16) && y == objdump.shd[i].sh_size)
 			break;
+		(void)y;
 		if (!(y % 4) && y > 0 && (y % 16))
 			printf(" ");
 		else if (!(y % 16) && y > 0) {

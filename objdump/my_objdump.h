@@ -32,7 +32,6 @@ typedef struct objdump_s {
 	int nb_func;
 	int shnum;
 	char *file_name;
-	int osn;
 } objdump_t;
 
 typedef struct pc_s {

@@ -60,6 +60,14 @@ void aff_nmtab(void)
 	}
 }
 
+void verif_name(int i, int y)
+{
+	if (nm.symtab[y].st_shndx == SHN_UNDEF)
+		nm.nmtab[i].value = -1;
+	else
+		nm.nmtab[i].value = nm.symtab[y].st_value;
+}
+
 void fill_nmtab(void)
 {
 	int y = 0;
@@ -71,10 +79,7 @@ void fill_nmtab(void)
 			nm.nmtab[i].name = (char *)(nm.buf +
 				nm.str_tab->sh_offset + nm.symtab[y].st_name);
 			nm.nmtab[i].type = print_type(nm.symtab[y], nm.shd);
-			if (nm.symtab[y].st_shndx == SHN_UNDEF)
-				nm.nmtab[i].value = -1;
-			else
-				nm.nmtab[i].value = nm.symtab[y].st_value;
+			verif_name(i, y);
 			++i;
 		}
 	}

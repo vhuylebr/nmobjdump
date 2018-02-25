@@ -73,10 +73,9 @@ void info_type(Elf64_Sym sym, char *c, Elf64_Shdr *shdr)
 			*c = 'u';
 			break;
 		case STB_WEAK:
-			if (ELF64_ST_TYPE(sym.st_info) == STT_OBJECT) {
+			if (ELF64_ST_TYPE(sym.st_info) == STT_OBJECT ||
+				sym.st_shndx == SHN_UNDEF) {
 				*c = 'v';
-				if (sym.st_shndx == SHN_UNDEF)
-					*c = 'v';
 				break;
 			}
 			*c = 'W';

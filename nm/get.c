@@ -7,6 +7,13 @@
 
 #include "my_nm.h"
 
+static void set_osn(char *name_s)
+{
+	if (!strcmp(name_s, ".shstrtab") && nm.osn == 0) {
+		nm.osn = nm.str_tab->sh_offset;
+	}
+}
+
 void get_str_tab(void)
 {
 	int i;
@@ -17,10 +24,7 @@ void get_str_tab(void)
 			nm.str_tab = &nm.shd[i];
 			name_s = (char*)nm.buf + nm.str_tab->sh_offset
 				+ nm.shd[i].sh_name;
-			if (!strcmp(name_s, ".shstrtab") && nm.osn == 0) {
-				nm.osn = nm.str_tab->sh_offset;
-				break;
-			}
+			set_osn(name_s);
 		}
 	}
 	for (i = 0; i < nm.shnum; ++i) {

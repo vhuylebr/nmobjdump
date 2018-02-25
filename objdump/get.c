@@ -28,6 +28,22 @@ static pc_t const pc[20] = {
 	{EM_X86_64, "i386:x86-64"}
 };
 
+static int set_strtab(int i)
+{
+	char *name_s;
+
+	if (objdump.shd[i].sh_type == SHT_STRTAB) {
+		objdump.str_tab = &objdump.shd[i];
+		name_s = (char*)objdump.buf + objdump.str_tab->sh_offset
+			+ objdump.shd[i].sh_name;
+		if (!strcmp(name_s, ".shstrtab")) {
+			objdump.str_tab = &objdump.shd[i];
+			return (1);
+		}
+	}
+	return (0);
+}
+
 void get_machine_name(void)
 {
 	int i = 0;
@@ -45,19 +61,10 @@ void get_machine_name(void)
 void get_str_tab(void)
 {
 	int i;
-	char *name_s;
 
 	for (i = 0; i < objdump.shnum; ++i) {
-		if (objdump.shd[i].sh_type == SHT_STRTAB) {
-			objdump.str_tab = &objdump.shd[i];
-			name_s = (char*)objdump.buf + objdump.str_tab->sh_offset
-				+ objdump.shd[i].sh_name;
-			if (!strcmp(name_s, ".shstrtab") && objdump.osn == 0) {
-				objdump.osn = objdump.str_tab->sh_offset;
-				objdump.str_tab = &objdump.shd[i];
-				break;
-			}
-		}
+		if (set_strtab(i))
+			return ;
 	}
 }
 
@@ -73,5 +80,5 @@ char *getflag(void)
 		case ET_CORE:
 			return ("Core\n");
 	}
-        return ("(null)");
+	return ("(null)");
 }
