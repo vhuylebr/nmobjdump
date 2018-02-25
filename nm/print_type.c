@@ -74,12 +74,12 @@ void info_type(Elf64_Sym sym, char *c, Elf64_Shdr *shdr)
 			break;
 		case STB_WEAK:
 			if (ELF64_ST_BIND(sym.st_info) == STB_WEAK) {
-                                *c = 'W';
-                        } else if (ELF64_ST_TYPE(sym.st_info) == STT_OBJECT) {
+				*c = 'W';
+			} else if (ELF64_ST_TYPE(sym.st_info) == STT_OBJECT) {
 				*c = 'V';
-                        }
-                        if (sym.st_shndx == SHN_UNDEF)
-                                *c = *c + 32;
+			}
+			if (sym.st_shndx == SHN_UNDEF)
+				*c = *c + 32;
 			break;
 	}
 	if (*c == 0)
