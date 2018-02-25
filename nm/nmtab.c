@@ -16,6 +16,7 @@ static int my_strcmp_nm(char *s, char *s2)
 		return (0);
 	while (s[i] == '_')
 		++i;
+	(void)i;
 	while (s2[y] == '_')
 		y++;
 	while (tolower(s2[y]) == tolower(s[i]) && s2[y] && s[i]) {

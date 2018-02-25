@@ -48,7 +48,6 @@ Elf64_Shdr get_section(int macro)
 	return (nm.shd[i]);
 }
 
-
 int find(int size, char *str, const char **str2)
 {
 	int i = 0;

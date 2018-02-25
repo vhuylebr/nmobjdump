@@ -13,7 +13,6 @@ int verif_flag(Elf64_Ehdr *elf)
 		  && elf->e_ident[3] == 'F')
 		return (1);
 	return (0);
-
 }
 
 void my_nm(void)
