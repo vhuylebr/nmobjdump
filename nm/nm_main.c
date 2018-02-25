@@ -57,6 +57,12 @@ int start(void)
 	return (0);
 }
 
+void error(ac, ret)
+{
+	if (ac == 2 && ret == 84)
+		exit(84);
+}
+
 int main (int ac, char **av)
 {
 	int i = 1;
@@ -72,8 +78,7 @@ int main (int ac, char **av)
 			nm.file_name = av[i];
 			nm.fd = open(av[i], O_RDONLY);
 			ret = start();
-			if (ret == 84 && ac == 2)
-				return (84);
+			error(ac, ret);
 			++i;
 		}
 	}
