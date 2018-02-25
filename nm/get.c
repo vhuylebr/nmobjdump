@@ -19,6 +19,7 @@ void get_str_tab(void)
 	int i;
 	char *name_s;
 
+	nm.osn = 0;
 	for (i = 0; i < nm.shnum; ++i) {
 		if (nm.shd[i].sh_type == SHT_STRTAB) {
 			nm.str_tab = &nm.shd[i];
