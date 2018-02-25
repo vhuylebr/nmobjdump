@@ -82,3 +82,15 @@ char *getflag(void)
 	}
 	return ("(null)");
 }
+
+int find(int size, char *str, const char **str2)
+{
+	int i = 0;
+
+	while (i < size) {
+		if (!strcmp(str, str2[i]))
+			return (0);
+		++i;
+	}
+	return (1);
+}

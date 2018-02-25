@@ -79,3 +79,12 @@ void print_data(char *sh_strtab_p)
 		}
 	}
 }
+
+int verif_flag(Elf64_Ehdr *elf)
+{
+	if (elf->e_ident[1] == 'E' && elf->e_ident[2] == 'L'
+		  && elf->e_ident[3] == 'F')
+		return (1);
+	return (0);
+
+}

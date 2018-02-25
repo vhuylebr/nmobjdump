@@ -47,6 +47,8 @@ void print_end(unsigned int y, int i, char *str);
 void print_hex(int i);
 void print_data(char *sh_strtab_p);
 int is_ok(char *str, int i);
+int find(int size, char *str, const char **str2);
+int verif_flag(Elf64_Ehdr *elf);
 
 objdump_t objdump;
 

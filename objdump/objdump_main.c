@@ -29,27 +29,6 @@ static char const *bad_section_exec[] = {
 	".bss"
 };
 
-int verif_flag(Elf64_Ehdr *elf)
-{
-	if (elf->e_ident[1] == 'E' && elf->e_ident[2] == 'L'
-		  && elf->e_ident[3] == 'F')
-		return (1);
-	return (0);
-
-}
-
-int find(int size, char *str, const char **str2)
-{
-	int i = 0;
-
-	while (i < size) {
-		if (!strcmp(str, str2[i]))
-			return (0);
-		++i;
-	}
-	return (1);
-}
-
 int is_ok(char *str, int i)
 {
 	if (objdump.elf->e_type == ET_REL) {
@@ -100,7 +79,7 @@ int start(void)
 	return (0);
 }
 
-void error(ac, ret)
+static void error(ac, ret)
 {
 	if (ac == 2 && ret == 84)
 		exit(84);
