@@ -28,6 +28,11 @@ typedef struct objdump_s {
 	Elf64_Shdr *shd;
 	Elf64_Shdr sect_sym;
 	Elf64_Shdr *str_tab;
+	Elf32_Ehdr *elf32;
+	Elf32_Sym *symtab32;
+	Elf32_Shdr *shd32;
+	Elf32_Shdr sect_sym32;
+	Elf32_Shdr *str_tab32;
 	int nb_file;
 	int nb_func;
 	int shnum;
@@ -49,7 +54,32 @@ void print_data(char *sh_strtab_p);
 int is_ok(char *str, int i);
 int find(int size, char *str, const char **str2);
 int verif_flag(Elf64_Ehdr *elf);
+void my_objdump(void);
+void my_objdump32(void);
 
 objdump_t objdump;
+
+
+static char const *bad_section_o[] = {
+	".rela.eh_frame",
+	".strtab",
+	".shstrtab",
+	".note.GNU-stack",
+	".symtab",
+	".data",
+	".rela.text",
+	".bss",
+	".rela.rodata"
+};
+
+static char const *bad_section_exec[] = {
+	".rela.eh_frame",
+	".strtab",
+	".shstrtab",
+	".note.GNU-stack",
+	".symtab",
+	".rela.text",
+	".bss"
+};
 
 #endif /* !MY_OBJDUP_H_ */

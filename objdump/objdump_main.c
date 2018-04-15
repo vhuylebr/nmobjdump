@@ -7,28 +7,6 @@
 
 #include "my_objdump.h"
 
-static char const *bad_section_o[] = {
-	".rela.eh_frame",
-	".strtab",
-	".shstrtab",
-	".note.GNU-stack",
-	".symtab",
-	".data",
-	".rela.text",
-	".bss",
-	".rela.rodata"
-};
-
-static char const *bad_section_exec[] = {
-	".rela.eh_frame",
-	".strtab",
-	".shstrtab",
-	".note.GNU-stack",
-	".symtab",
-	".rela.text",
-	".bss"
-};
-
 int is_ok(char *str, int i)
 {
 	if (objdump.elf->e_type == ET_REL) {
@@ -66,7 +44,6 @@ int start(void)
 			MAP_PRIVATE, objdump.fd, 0);
 		if (objdump.buf != NULL &&
 			verif_flag((Elf64_Ehdr *)objdump.buf)) {
-			my_objdump();
 		} else {
 			dprintf(2, "my_objdump: « %s »: not a valid file.\n",
 				objdump.file_name);

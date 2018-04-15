@@ -83,8 +83,13 @@ void print_data(char *sh_strtab_p)
 int verif_flag(Elf64_Ehdr *elf)
 {
 	if (elf->e_ident[1] == 'E' && elf->e_ident[2] == 'L'
-		  && elf->e_ident[3] == 'F')
+		  && elf->e_ident[3] == 'F') {
+		if (elf->e_ident[EI_CLASS] == ELFCLASS64)
+			my_objdump();
+		else
+			my_objdump32();
 		return (1);
+	}
 	return (0);
 
 }
