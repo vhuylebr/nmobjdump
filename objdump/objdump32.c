@@ -73,11 +73,11 @@ char *getflag32(void)
 {
 	switch (objdump.elf32->e_type) {
 		case ET_REL:
-			return ("00000011:\nHAS_RELOC, HAS_SYMS");
+			return ("0x00000011:\nHAS_RELOC, HAS_SYMS");
 		case ET_EXEC:
-			return ("00000112:\nEXEC_P, HAS_SYMS, D_PAGED");
+			return ("0x00000112:\nEXEC_P, HAS_SYMS, D_PAGED");
 		case ET_DYN:
-			return ("00000150:\nHAS_SYMS, DYNAMIC, D_PAGED");
+			return ("0x00000150:\nHAS_SYMS, DYNAMIC, D_PAGED");
 		case ET_CORE:
 			return ("Core\n");
 	}
@@ -154,9 +154,9 @@ void my_objdump32(void)
 	objdump.shd32 = objdump.buf + objdump.elf32->e_shoff;
 	get_machine_name32();
 	get_str_tab32();
-	printf("\n%s:     file format %s\n", objdump.file_name, "elf32-x86-64");
-	printf("architecture: %s, flags %s\n", objdump.machine_name,
+	printf("\n%s:     file format %s\n", objdump.file_name, "elf32-i386");
+	printf("architecture: i386, flags %s\n",
 		getflag32());
-	printf("start address 0x%016lx\n\n", objdump.elf32->e_entry);
+	printf("start address 0x%08lx\n\n", objdump.elf32->e_entry);
 	print_data32(objdump.buf + objdump.str_tab32->sh_offset);
 }
