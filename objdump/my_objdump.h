@@ -56,9 +56,13 @@ int find(int size, char *str, const char **str2);
 int verif_flag(Elf64_Ehdr *elf);
 void my_objdump(void);
 void my_objdump32(void);
+void get_machine_name32(void);
+int set_strtab32(int i);
+void get_str_tab32(void);
+char *getflag32(void);
+int is_ok32(char *str, int i);
 
 objdump_t objdump;
-
 
 static char const *bad_section_o[] = {
 	".rela.eh_frame",

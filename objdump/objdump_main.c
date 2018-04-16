@@ -38,20 +38,20 @@ int start(void)
 	if (objdump.fd != -1) {
 		fstat(objdump.fd, &objdump.s);
 		if (S_ISDIR(objdump.s.st_mode))
-			return (dprintf(2, "my_objdump: « %s »: is a folder.\n",
+			return (dprintf(2, "nm: Warning: '%s' is a directory\n",
 				objdump.file_name) * 0 + 84);
 		objdump.buf = mmap(NULL, objdump.s.st_size, PROT_READ,
 			MAP_PRIVATE, objdump.fd, 0);
 		if (objdump.buf != NULL &&
 			verif_flag((Elf64_Ehdr *)objdump.buf)) {
 		} else {
-			dprintf(2, "my_objdump: « %s »: not a valid file.\n",
+			dprintf(2, "my_nm: %s: File format not recognized\n",
 				objdump.file_name);
 			return (84);
 		}
 		close(objdump.fd);
 	} else
-		return (dprintf(2, "my_objdump: « %s »: file not found.\n",
+		return (dprintf(2, "nm: '%s': No such file\n",
 			objdump.file_name) * 0 + 84);
 	return (0);
 }
