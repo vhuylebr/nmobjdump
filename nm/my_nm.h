@@ -39,6 +39,7 @@ typedef struct nm_s {
 	int shnum;
 	int osn;
 	char *file_name;
+	int ret;
 }	nm_t;
 
 void get_str_tab(void);

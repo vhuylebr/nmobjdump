@@ -56,7 +56,7 @@ int start(void)
 	return (0);
 }
 
-static void error(ac, ret)
+static void error(int ac, int ret)
 {
 	if (ac == 2 && ret == 84)
 		exit(84);

@@ -37,27 +37,29 @@ int start(void)
 	if (nm.fd != -1) {
 		fstat(nm.fd, &nm.s);
 		if (S_ISDIR(nm.s.st_mode))
-			return (dprintf(2, "my_nm: « %s »: is a folder.\n",
+			return (dprintf(2, "nm: Warning: '%s' is a directory\n",
 				nm.file_name) * 0 + 84);
 		nm.buf = mmap(NULL, nm.s.st_size, PROT_READ, MAP_PRIVATE, nm.fd,
 			0);
 		if (nm.buf != NULL && verif_flag((Elf64_Ehdr *)nm.buf)) {
 			my_nm();
 		} else {
-			dprintf(2, "my_nm: « %s »: not a valid file.\n",
+			dprintf(2, "my_nm: %s: File format not recognized\n",
 				nm.file_name);
 			return (84);
 		}
 		munmap(nm.buf, nm.s.st_size);
 		close(nm.fd);
 	} else
-		return (dprintf(2, "my_nm: « %s »: file not found.\n",
+		return (dprintf(2, "nm: '%s': No such file\n",
 			nm.file_name) * 0 + 84);
 	return (0);
 }
 
-void error(ac, ret)
+void error(int ac, int ret)
 {
+	if (ret == 84)
+		nm.ret = 84;
 	if (ac == 2 && ret == 84)
 		exit(84);
 }
@@ -68,6 +70,7 @@ int main (int ac, char **av)
 	int ret = 0;
 
 	nm.nb_file = ac;
+	nm.ret = 0;
 	if (ac == 1) {
 		nm.fd = open("a.out", O_RDONLY);
 		nm.file_name = "a.out";
@@ -81,5 +84,5 @@ int main (int ac, char **av)
 			++i;
 		}
 	}
-	return (0);
+	return (nm.ret);
 }
