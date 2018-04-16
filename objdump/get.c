@@ -72,11 +72,11 @@ char *getflag(void)
 {
 	switch (objdump.elf->e_type) {
 		case ET_REL:
-			return ("00000011:\nHAS_RELOC, HAS_SYMS");
+			return ("0x00000011:\nHAS_RELOC, HAS_SYMS");
 		case ET_EXEC:
-			return ("00000112:\nEXEC_P, HAS_SYMS, D_PAGED");
+			return ("0x00000112:\nEXEC_P, HAS_SYMS, D_PAGED");
 		case ET_DYN:
-			return ("00000150:\nHAS_SYMS, DYNAMIC, D_PAGED");
+			return ("0x00000150:\nHAS_SYMS, DYNAMIC, D_PAGED");
 		case ET_CORE:
 			return ("Core\n");
 	}
